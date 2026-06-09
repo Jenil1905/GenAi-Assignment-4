@@ -35,6 +35,16 @@ const AgentState = Annotation.Root({
 
 });
 
+//conditional edge function
+function decideAfterObserve(state){
+    if(state.usernameFound && state.descriptionFound){
+        console.log('[DECISION] Proceeding to fill Form.')
+        return "fillForm"
+    }
+    console.log('[DECISION] Element not found. Closing browser.')
+    return "closeBrowser";
+}
+
 const graph = new StateGraph(AgentState);
 
 //add nodes
@@ -50,7 +60,7 @@ graph.addNode('closeBrowser', closeBrowserNode);
 graph.addEdge(START, 'openBrowser');
 graph.addEdge('openBrowser', 'navigate');
 graph.addEdge('navigate','observe');
-graph.addEdge('observe','fillForm');
+graph.addConditionalEdges('observe', decideAfterObserve, {fillForm: 'fillForm', closeBrowser: 'closeBrowser'});
 graph.addEdge('fillForm','verify');
 graph.addEdge('verify','screenshot');
 graph.addEdge('screenshot','closeBrowser');
